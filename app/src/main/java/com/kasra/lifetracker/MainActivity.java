@@ -13,8 +13,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.kasra.lifetracker.db.DatabaseManager;
 import com.kasra.lifetracker.models.Task;
 import com.kasra.lifetracker.utils.RecyclerItemClickListener;
+import com.kasra.lifetracker.widget.LTRecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +25,9 @@ import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
-    private RecyclerView mRecyclerView;
+    private LTRecyclerView mRecyclerView;
     private TaskAdapter mAdapter;
+    private FloatingActionButton mAddButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,28 +36,34 @@ public class MainActivity extends ActionBarActivity {
 
         getSupportActionBar().setTitle("All Tasks");
 
-        mRecyclerView = (RecyclerView)findViewById(R.id.main_list);
+        mRecyclerView = (LTRecyclerView)findViewById(R.id.main_list);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Let's make some fake tasks
-        Task task = new Task("Took anti-anxiety pills", 0xFF03A9F4, null);
-        Task task2 = new Task("Got to work", 0xFF4CAF50, new double[] { 40.712784, 74.0059413 });
-        ArrayList<Task> taskList = new ArrayList<>();
-
-        taskList.add(task);
-        taskList.add(task2);
+        List<Task> taskList = DatabaseManager.getInstance(this).getAllTasks();
 
         mAdapter = new TaskAdapter(taskList);
         mRecyclerView.setAdapter(mAdapter);
 
-        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                Toast.makeText(MainActivity.this, "Touched " + position, Toast.LENGTH_SHORT).show();
-            }
-        }));
+        mRecyclerView.setOnItemClickListener(onListItemClicked);
+
+        mAddButton = (FloatingActionButton)findViewById(R.id.main_fab);
+        mAddButton.setOnClickListener(onAddButtonClicked);
     }
+
+    private View.OnClickListener onAddButtonClicked = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            // #TODO
+        }
+    };
+
+    private RecyclerItemClickListener.OnItemClickListener onListItemClicked = new RecyclerItemClickListener.OnItemClickListener() {
+        @Override
+        public void onItemClick(View view, int position) {
+            // #TODO
+        }
+    };
 
     public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         private List<Task> mTasks;
