@@ -42,6 +42,20 @@ public class DatabaseManager {
         return sInstance;
     }
 
+    public Task getTaskById(long id) {
+        Cursor c = mDb.query(TABLE_TASK, new String[] { "_id", COLUMN_TASK_NAME, COLUMN_TASK_COLOR, COLUMN_TASK_GEOFENCE },
+                "_id = ?", new String[] { String.valueOf(id) }, null, null, null);
+
+        Task task = null;
+
+        if (c.moveToFirst()) {
+            task = getTaskFromCursor(c);
+        }
+
+        c.close();
+        return task;
+    }
+
     public List<Task> getAllTasks() {
         Cursor c = mDb.query(TABLE_TASK, new String[] { "_id", COLUMN_TASK_NAME, COLUMN_TASK_COLOR, COLUMN_TASK_GEOFENCE },
                 null, null, null, null, null);
@@ -50,33 +64,36 @@ public class DatabaseManager {
         ArrayList<Task> tasks = new ArrayList<>(count);
 
         while(c.moveToNext()) {
-            long id = c.getLong(c.getColumnIndex("_id"));
-            String name = c.getString(c.getColumnIndex(COLUMN_TASK_NAME));
-            int color = c.getInt(c.getColumnIndex(COLUMN_TASK_COLOR));
-
-            String geoFenceStr = c.isNull(c.getColumnIndex(COLUMN_TASK_GEOFENCE)) ? null : c.getString(c.getColumnIndex(COLUMN_TASK_GEOFENCE));
-            double[] geoFence = new double[2];
-            if (geoFenceStr != null) {
-                // hey should this be a indexOf() and substrings instead?
-                String[] split = geoFenceStr.split(",");
-                geoFence[0] = Double.valueOf(split[0]);
-                geoFence[1] = Double.valueOf(split[1]);
-            }
-
-            Date lastEventAt = null;
-            if (!c.isNull(c.getColumnIndex(COLUMN_TASK_LAST_EVENT_TIMESTAMP))) {
-                try {
-                    lastEventAt = SimpleDateFormat.getInstance().parse(c.getString(c.getColumnIndex(COLUMN_TASK_LAST_EVENT_TIMESTAMP)));
-                } catch (ParseException e) { /* who cares */ }
-            }
-
-            Task t = new Task(id, name, color, geoFence, lastEventAt);
-            tasks.add(t);
+            tasks.add(getTaskFromCursor(c));
         }
 
         c.close();
 
         return tasks;
+    }
+
+    private Task getTaskFromCursor(Cursor c) {
+        long id = c.getLong(c.getColumnIndex("_id"));
+        String name = c.getString(c.getColumnIndex(COLUMN_TASK_NAME));
+        int color = c.getInt(c.getColumnIndex(COLUMN_TASK_COLOR));
+
+        String geoFenceStr = c.isNull(c.getColumnIndex(COLUMN_TASK_GEOFENCE)) ? null : c.getString(c.getColumnIndex(COLUMN_TASK_GEOFENCE));
+        double[] geoFence = new double[2];
+        if (geoFenceStr != null) {
+            // hey should this be a indexOf() and substrings instead?
+            String[] split = geoFenceStr.split(",");
+            geoFence[0] = Double.valueOf(split[0]);
+            geoFence[1] = Double.valueOf(split[1]);
+        }
+
+        Date lastEventAt = null;
+        if (!c.isNull(c.getColumnIndex(COLUMN_TASK_LAST_EVENT_TIMESTAMP))) {
+            try {
+                lastEventAt = SimpleDateFormat.getInstance().parse(c.getString(c.getColumnIndex(COLUMN_TASK_LAST_EVENT_TIMESTAMP)));
+            } catch (ParseException e) { /* who cares */ }
+        }
+
+        return new Task(id, name, color, geoFence, lastEventAt);
     }
 
     public long createTask(String name, int color, double[] geoFence) {

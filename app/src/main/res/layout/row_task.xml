@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    tools:layout_height="48dp">
 
     <View
         android:id="@+id/row_task_indicator"
@@ -22,10 +24,11 @@
         android:id="@+id/row_task_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/activity_horizontal_margin"
         android:paddingEnd="@dimen/activity_horizontal_margin"
-        android:minHeight="?android:attr/listPreferredItemHeight" />
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        tools:text="Did the laundry" />
 
 </LinearLayout>

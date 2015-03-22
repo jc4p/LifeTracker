@@ -1,33 +1,32 @@
 package com.kasra.lifetracker;
 
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.kasra.lifetracker.db.DatabaseManager;
 import com.kasra.lifetracker.models.Task;
+import com.kasra.lifetracker.utils.Constants;
 import com.kasra.lifetracker.utils.RecyclerItemClickListener;
 import com.kasra.lifetracker.widget.LTRecyclerView;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-
 public class MainActivity extends ActionBarActivity {
+    // UI
     private LTRecyclerView mRecyclerView;
     private TaskAdapter mAdapter;
     private FloatingActionButton mAddButton;
+
+    // Logic
+    private final static int REQUEST_CODE_ADD_TASK = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
     private View.OnClickListener onAddButtonClicked = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            // #TODO
+            startActivityForResult(new Intent(MainActivity.this, AddTaskActivity.class), REQUEST_CODE_ADD_TASK);
         }
     };
 
@@ -65,11 +64,32 @@ public class MainActivity extends ActionBarActivity {
         }
     };
 
+    private void addTaskToList(long taskId ) {
+        if (taskId == -1)
+            return;
+
+        Task t = DatabaseManager.getInstance(this).getTaskById(taskId);
+        mAdapter.addTask(t);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_ADD_TASK && resultCode == RESULT_OK && data != null) {
+            addTaskToList(data.getLongExtra(Constants.TASK_ID, -1));
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         private List<Task> mTasks;
 
         public TaskAdapter(List<Task> tasks) {
             mTasks = tasks;
+        }
+
+        public void addTask(Task task) {
+            if (mTasks.add(task))
+                notifyItemInserted(mTasks.size());
         }
 
         @Override
